@@ -1,22 +1,66 @@
 import hashlib
-from django.http import HttpResponse
+
 from django.shortcuts import render, HttpResponseRedirect
 import sqlite3
-from .models import products, categories, Doctor ,Patient
+from .models import products, categories, Doctor, Patient, File, Report, order, Confirm
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
-from .forms import ProductsForm, DoctorForm,NotificationsForm
-from .models import Notifications
+from .forms import ProductsForm, DoctorForm
+from django.http import HttpResponse
+from django.views.generic import View
 
-def notifications(request):
-    if request.method == 'POST':
-        db = sqlite3.connect('db.sqlite3')
-        cursor = db.cursor()
-        file = request.POST.get("file")
-        userId = request.POST.get("userId")
-        cursor.execute('INSERT INTO app_notifications (file, userId ) VALUES (?, ?)',
-        (file,userId))
-        db.commit()
+from .utils import  render_to_pdf
+
+from io import BytesIO
+from django.http import HttpResponse
+from django.template.loader import get_template
+
+from django.http import HttpResponse
+from django.views.generic import View
+
+from .utils import render_to_pdf #created in step 4
+
+from reportlab.pdfgen import canvas
+from django.http import HttpResponse
+
+
+class GeneratePDF(View):
+    def get(self, request, *args, **kwargs):
+        template = get_template('ireport.html')
+        rep=order.objects.all()
+        context={'rep':rep}
+
+        html = template.render(context)
+        pdf = render_to_pdf('ireport.html',context)
+        if pdf:
+            response = HttpResponse(pdf, content_type='application/pdf')
+            filename = "Invoice_%s.pdf" % ("Order")
+            content = "inline; filename='%s'" % (filename)
+            download = request.GET.get("download")
+            if download:
+                content = "attachment; filename='%s'" % (filename)
+            response['Content-Disposition'] = content
+            return response
+        return HttpResponse("Not found")
+
+class Patient(View):
+    def get(self, request, *args, **kwargs):
+        template = get_template('iPatientreport.html')
+        rep=Confirm.objects.all()
+        context={'rep':rep}
+
+        html = template.render(context)
+        pdf = render_to_pdf('iPatientreport.html',context)
+        if pdf:
+            response = HttpResponse(pdf, content_type='application/pdf')
+            filename = "Invoice_%s.pdf" % ("Order")
+            content = "inline; filename='%s'" % (filename)
+            download = request.GET.get("download")
+            if download:
+                content = "attachment; filename='%s'" % (filename)
+            response['Content-Disposition'] = content
+            return response
+        return HttpResponse("Not found")
 
 
 def detail(request):
@@ -222,7 +266,7 @@ def clearcart(request):
         msg.attach_alternative(html_content, "text/html")
         msg.send()
         cursor.execute(
-            "INSERT into app_order SELECT NULL,  app_products.name, app_products.price, app_products.description, app_products.image, app_products.productId, app_kart.userId_id FROM app_products, app_kart WHERE app_products.productId = app_kart.productId_id AND app_kart.userId_id = " + str(
+            "INSERT into app_order  SELECT NULL,  app_products.name, app_products.price, app_products.description, app_products.image, app_products.productId, app_kart.userId_id FROM app_products, app_kart WHERE app_products.productId = app_kart.productId_id AND app_kart.userId_id = " + str(
                 userId))
         cursor.execute("DELETE FROM app_kart WHERE userId_id = " + str(userId))
     db.commit()
@@ -301,7 +345,7 @@ def removeFromCart(request):
     return HttpResponseRedirect('/app/')
 
 
-def remove(request):
+def admin(request):
     if not request.session.get('logged_in'):
         return render(request, 'alogin.html')
     else:
@@ -398,7 +442,7 @@ def alogin(request):
         if is_valid1(email, password):
             request.session['logged_in'] = email
             request.session.set_expiry(550)
-            return HttpResponseRedirect('/app/remove/')
+            return HttpResponseRedirect('/app/admin/')
         else:
             return HttpResponse("Invalid")
     return render(request, 'alogin.html')
@@ -559,7 +603,7 @@ def CancelAppointment(request):
     cursor.execute("SELECT name FROM app_patient WHERE id = '" + str(id) + "'")
     PatientData = cursor.fetchall()
     mail = get_template('Cancel.html')
-    subject, from_email, to = 'Appointment Cancel', 'harirooban43@gmail.com', email
+    subject, from_email, to = 'Appointment Cancel', 'slalalal104@gmail.com', email
     text_content = 'This is an important message.'
     html_content = mail.render({'PatientData': PatientData})
     msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
@@ -578,19 +622,34 @@ def ConfirmAppointment(request):
     cursor.execute("SELECT name ,date,time,gender FROM app_patient WHERE id = '" + str(id) + "'")
     PatientData = cursor.fetchall()
     mail = get_template('Confirm.html')
-    subject, from_email, to = 'Appointment confirmation mail', 'harirooban43@gmail.com', email
+    subject, from_email, to = 'Appointment confirmation mail', 'slalalal104@gmail.com', email
     text_content = 'This is an important message.'
     html_content = mail.render({'PatientData': PatientData})
     msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
     msg.attach_alternative(html_content, "text/html")
     msg.send()
-    cursor.execute("INSERT INTO app_confirm SELECT NULL,name, phone,email,gender,date,time,visit,EmailId FROM app_patient WHERE id ='" + str(id)+"'")
+    cursor.execute("INSERT INTO app_confirm SELECT name, phone,gender,Spec,DoctorName,EmailId,Time,visit,Email,date FROM app_patient WHERE id ='" + str(id)+"'")
+    f=Confirm.objects.all()
     cursor.execute("DELETE FROM app_patient WHERE id = '" + str(id)+"'")
     db.commit()
     return HttpResponseRedirect('/app/DoctorPage/')
 
 def file(request):
-    cotext={
-        'confirm':'Wait for Comfirmation'
-    }
-    return render(request,'file.html')
+
+    if request.method == 'POST':
+        id = request.POST["num"]
+        file = request.POST["file"]
+        date = request.POST["date"]
+        f=File(id=id,file=file,date=date)
+        f.save()
+    return render(request, 'file.html')
+
+def about(request):
+    return render(request,'about.html')
+def report(request):
+    rep=order.objects.all
+    return render(request,'report.html',{'rep':rep})
+
+def patient(request):
+    rep=Confirm.objects.all()
+    return render(request,'Patientreport.html',{'rep':rep})

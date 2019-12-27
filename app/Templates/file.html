@@ -2,11 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>File</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Home</title>
+    {% load static %}
+    <script src="{% static 'js/jquery.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'back.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <link href="{% static 'font-awesome-4.7.0/css/font-awesome.min.css' %}" rel="stylesheet">
 </head>
 <body>
+  <center>
+    
+  
 <h1>Give the Doctor Prscripton</h1>
- <input type="file">
-<a  href="/app/cart/" type="button" class="btn btn-primary"  >Next</a>
+<form action="/app/file/" method="POST">
+    {% csrf_token %}
+
+
+ <input type="number" name="num" placeholder="Please your Mobile Number">
+ <input type="file" name="file" placeholder="Please give the Prscripton">
+  <input type="date" name="date" placeholder="Please give the date">
+  <input type="submit"  >
+
+
+   <a  href="/app/clearcart" onclick="myFunction()" type="button" class="btn btn-primary"  >Place Order</a>
+    </form>
+  <script>
+function myFunction() {
+    {% if noOfItems == 0 %}
+     alert(" Sorry Your cart is empty ")
+    {% else %}
+     alert("Your Order Has been placed \n Confirmation mail will send to your registered email Id!");
+    {% endif %}
+}
+</script>
+</center>
 </body>
 </html>

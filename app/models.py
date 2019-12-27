@@ -37,6 +37,7 @@ class kart(models.Model):
 
 class Patient(models.Model):
     objects = None
+    id=models.IntegerField(primary_key=True)
     name = models.CharField(max_length=300)
     phone = models.IntegerField()
     Email = models.EmailField(max_length=100)
@@ -71,8 +72,9 @@ class Doctor(models.Model):
 
 
 class order(models.Model):
+
     name = models.CharField(max_length=300)
-    price = models.DecimalField('medium', max_digits=20, decimal_places=10, blank=True, null=True)
+    price = models.DecimalField('medium', max_digits=20, decimal_places=3, blank=True, null=True)
     description = models.CharField(max_length=300)
     image = models.FileField(upload_to='products', null=True, verbose_name="")
     productId = models.IntegerField(null=True)
@@ -80,20 +82,44 @@ class order(models.Model):
 
 
 
+
 class Confirm(models.Model):
+    #name = models.CharField(max_length=300)
+   # phone = models.IntegerField()
+   # Email = models.EmailField(max_length=100)
+   # gender = models.CharField(max_length=300)
+    #Date = models.CharField(max_length=100)
+    #Time = models.CharField(max_length=100)
+    #visit = models.CharField(max_length=200)
+    #EmailId = models.EmailField(max_length=100)
+    id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=300)
     phone = models.IntegerField()
     Email = models.EmailField(max_length=100)
     gender = models.CharField(max_length=300)
+    DoctorName = models.CharField(max_length=300)
+    Spec = models.CharField(max_length=300)
+    EmailId = models.CharField(max_length=100)
     Date = models.CharField(max_length=100)
     Time = models.CharField(max_length=100)
     visit = models.CharField(max_length=200)
-    EmailId = models.EmailField(max_length=100)
 
-
-class Notifications(models.Model):
+class File(models.Model):
+    id=models.IntegerField(primary_key=True)
     file=models.FileField()
-    userId=models.ForeignKey('users',on_delete=models.CASCADE)
+    date=models.DateField(auto_now=False,auto_now_add=False)
+ 
+   
+
+class Report(models.Model):
+    name = models.CharField(max_length=300)
+    price = models.DecimalField('medium', max_digits=20, decimal_places=10, blank=True, null=True)
+    description = models.CharField(max_length=300)
+    image = models.FileField(upload_to='products', null=True, verbose_name="")
+    productId = models.IntegerField(null=True)
+    userId = models.ForeignKey("users",on_delete=models.CASCADE)
+
+
 
 
 

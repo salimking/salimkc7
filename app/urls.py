@@ -2,9 +2,12 @@ from django.conf import settings
 from django.urls import include, path
 from . import views
 from django.conf.urls.static import static
-
+from .views import GeneratePDF
+from .views import Patient
+from django.views.generic import TemplateView
 urlpatterns = [
         path('', views.index, name='index'),
+       # path('admin', views.admin, name='admin'),
         path('product/', views.product, name='product'),
         path('book/', views.book, name='book'),
         path('appoint/', views.appoint, name='appoint'),
@@ -20,7 +23,7 @@ urlpatterns = [
         path('addToCart/', views.addToCart, name='addToCart'),
         path('category/', views.category, name='category'),
         path('aboutproduct/', views.aboutproduct, name='aboutproduct'),
-        path('remove/', views.remove, name='remove'),
+        path('admin/', views.admin, name='admin'),
         path('logout/', views.logout, name='logout'),
         path('alogout/', views.alogout, name='alogout'),
         path('addItem/', views.addItem, name='addItem'),
@@ -39,6 +42,13 @@ urlpatterns = [
         path('DoctorDetail/', views.DoctorDetail, name='DoctorDetail'),
         path('CancelAppointment/', views.CancelAppointment, name='CancelAppointment'),
         path('file/', views.file , name='file '),
+        path('about/', views.about , name='about'),
+        #path('pdf/', views.getpdf , name='pdf'),
+        path('pdf/', GeneratePDF.as_view() ),
+        path('ppdf/', Patient.as_view() ),
+        path('report/', views.report , name='report'),
+        path('patient/', views.patient , name='patient'),
+
         path('ConfirmAppointment/', views.ConfirmAppointment, name='ConfirmAppointment'),
         #path('bKash_payment/', views.bkash, name='bkash'),
 ]   +static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

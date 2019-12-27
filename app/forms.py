@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import products, Doctor ,Patient,Notifications
+from .models import products, Doctor ,Patient,Report
 
 
 class ProductsForm(forms.ModelForm):
@@ -23,7 +23,4 @@ class PatientForm(forms.ModelForm):
         model = Patient
         fields = ('name', 'phone', 'Email', 'gender', 'DoctorName', 'Spec', 'EmailId', 'Date', 'Time', 'visit')
 
-class NotificationsForm(forms.ModelForm):
-    class Meta:
-        model=Notifications
-        fields=('file','userId')
+
